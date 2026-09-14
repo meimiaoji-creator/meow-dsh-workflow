@@ -1,0 +1,42 @@
+{
+  "name": "meow-dsh-workflow",
+  "version": "0.1.0",
+  "description": "dsh 插件：极简提示词生成器（v2.1）——Agent 定义存储 + 提示词生成 + meow_agent_call 子 agent 身份权限注入（双面插件包：node 半 storage/agentManager/tools + browser 半角色选择 UI）",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "agents.json"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-layout"
+      ],
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

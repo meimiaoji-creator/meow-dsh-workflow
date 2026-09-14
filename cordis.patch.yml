@@ -1,0 +1,20 @@
+# meow-dsh-workflow bundle layer.
+#
+# 组合层：插入一行 meow-dsh-workflow（与 meow-dsh-task / meow-file-view 同款形态）。
+# 插件 apply() 会：
+#   1. 读 $DSH_HOME/meow-dsh-workflow/agents.json（Agent 定义库；首次加载种入 T-07 预置 6 角色
+#      并落盘）+ workspace-config.json（可移植配置）；
+#   2. 注册 meow_agent_call 工具（ctx.tools.register）：按 Agent 定义注入 persona + toolFilter
+#      创建/续聊子 agent（ctx.subagents.startContinuable / sendMessage，2026-09 起 followup 已改 sendMessage）；
+#   3. 注册 Web 路由（ctx.webServer）：/api/meow-workflow/*（GET /roles 角色列表 + POST /build-prompt
+#      组装提示词并注入角色协议 section，order 120，T-06/T-08 实现）；
+#   4. browser 半（T-09）：conversation.input.right 槽注入「角色」按钮 + 角色选择面板
+#      （两步流：选角色 → 填目标发起，数据经 /api/meow-workflow fetch）。
+#   inject 含 'tools'/'subagents'/'systemPrompt'/'webServer'：tools/subagents 来自 dsh-base，
+#   webServer 来自 web profile，强依赖 web profile 形态。
+- insert:
+    - id: meow-dsh-workflow
+      name: meow-dsh-workflow
+      config: {}
+        # 配置说明：当前无插件级配置项；全部数据走 $DSH_HOME/meow-dsh-workflow/。
+        # 注意：config 显式给 {} 而非空（空会解析成 null，插件 apply 会崩）
