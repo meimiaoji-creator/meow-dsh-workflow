@@ -8,7 +8,7 @@
 <img width="1512" height="393" alt="image" src="https://github.com/user-attachments/assets/3bb8bfe2-ce18-4b40-a911-447c24ebac03" />
 <img width="2058" height="939" alt="image" src="https://github.com/user-attachments/assets/b86fd13f-61f9-4045-bc3e-7be4ac41a3e9" />
 
-meow-dsh-workflow 是一个双面（node + browser）DSH 插件：内置一套可编辑的 **Agent 角色库**（研发链路 / 头脑风暴 / 3D 导演），把角色定义编译成系统提示词与工具白名单。你可以在输入框右侧点「角色」按钮、或敲 `/meow-workflow-<角色id>` 斜杠命令按角色发起会话；主 agent 再通过 `meow_agent_call` 按同一套角色定义创建/续聊**带 persona 与工具白名单的子 agent**，形成多层语言链。配套角色记忆（跨会话）与公司台账簿（decisions/actions/need-boss 等六本账，按项目隔离）。
+meow-dsh-workflow 是一个双面（node + browser）DSH 插件：内置一套可编辑的 **Agent 角色库**（研发链路 / 头脑风暴），把角色定义编译成系统提示词与工具白名单。你可以在输入框右侧点「角色」按钮、或敲 `/meow-workflow-<角色id>` 斜杠命令按角色发起会话；主 agent 再通过 `meow_agent_call` 按同一套角色定义创建/续聊**带 persona 与工具白名单的子 agent**，形成多层语言链。配套角色记忆（跨会话）与公司台账簿（decisions/actions/need-boss 等六本账，按项目隔离）。
 
 零 dsh 源码改动，与 meow-dsh-task / meow-file-view 等插件平级共存。
 
@@ -36,7 +36,7 @@ dsh 插件 --profile web add link:./
 
 安装完成后，重启 dsh 即可在会话输入框右侧看到 **「角色」** 按钮，`/` 命令目录里出现 `/meow-workflow-*` 系列命令。
 
-## 预置角色（11 个，可自行增删）
+## 预置角色（10 个，可自行增删）
 
 可发起的角色（launchable，出现在「角色」按钮与斜杠命令里）：
 
@@ -44,7 +44,6 @@ dsh 插件 --profile web add link:./
 |---|---|---|
 | 研发负责人 | `/meow-workflow-lead` | PM：拆解目标 → 分批派发工程师 → 评审闭环 → 交付报告，不亲自写码 |
 | 头脑风暴主持人 | `/meow-workflow-brainstorm` | 召集 5 位董事（第一性原理/魔鬼代言人/战略/执行/用户）发言、辩论、收敛决策材料 |
-| 3D 导演 | `/meow-workflow-director-3d` | 把粗糙的 3D 想法/参考图变成可开工的镜头单（Blender / Three.js / Houdini / C4D） |
 
 由上面角色派发的子 agent（不在命令目录，经 `meow_agent_call` 调用）：研发工程师、评审专家、智囊团·第一性原理、魔鬼代言人、战略愿景官、务实执行官、用户代言人、决议记录员。
 
@@ -83,6 +82,34 @@ dsh 插件 --profile web add link:./
 
 ### 5. 技能目录按角色授权过滤
 本地 + 远程技能统一按当前角色的 `allowedSkills` / `allowedMcps` 过滤，子 agent 看不到未授权的技能入口。
+
+---
+
+## 与 meow-dsh-task 联动（研发链路最佳实践）
+
+一句话分工：**meow-dsh-task 管「事」，meow-dsh-workflow 管「人」**——前者提供跨会话、离线、git 共享的任务台账与评审闭环，后者提供角色身份、权限白名单与子 agent 派发。
+
+| 关注点 | 由谁承担 | 用到的工具 |
+|---|---|---|
+| 任务清单 / 认领 / 状态追踪 | meow-dsh-task | `meow_dsh_task_init` / `claim` / `status_update` |
+| 过程留痕 / 交接接盘 | meow-dsh-task | `meow_dsh_task_checkpoint_append` / `handoff_write` |
+| 评审闭环 / issue 回流 | meow-dsh-task | `meow_dsh_task_review_*` / `issue_report` / `issue_resolve` |
+| 角色身份 / 工具权限 | meow-dsh-workflow | persona + `toolFilter.allow` 硬过滤 |
+| 子 agent 派发 / 续聊 | meow-dsh-workflow | `meow_agent_call`（`agentRunId` 复用同一实例） |
+| 角色「知道什么」（跨会话） | meow-dsh-workflow | `meow_memory_write/read`、`meow_ledger_write/read` |
+
+推荐研发流程（两个插件都装好即可开箱跑）：
+
+1. `/meow-workflow-lead` 发起：研发负责人拆解目标，`meow_dsh_task_init` 建任务清单；
+2. 逐任务 `meow_dsh_task_claim` 认领 → `meow_agent_call` 派发研发工程师实现 → 评审专家只读评审；
+3. 评审问题 `meow_dsh_task_issue_report` 登记后回流**原工程师**（凭 `agentRunId` 续聊修复，不另开新实例）→ 复评通过后 `meow_dsh_task_issue_resolve` 关闭；
+4. 关键决策/文件 `meow_dsh_task_checkpoint_append` 留痕——任务状态跨会话活在 meow-dsh-task 的任务台账里，角色记忆（项目×角色的决策与踩坑）活在 `meow_memory_*` 里，两边互不挤占会话上下文。
+
+预置「研发负责人」角色的工具白名单已内置全套 `meow_dsh_task_*` 工具。只装本插件、不装 meow-dsh-task 时，这些任务工具未注册、会被白名单过滤，研发链路退化为纯对话式派发（无跨会话任务台账）——要跑完整闭环请成对安装：
+
+```bash
+dsh 插件 --profile web add github:meimiaoji-creator/meow-dsh-task
+```
 
 ---
 
