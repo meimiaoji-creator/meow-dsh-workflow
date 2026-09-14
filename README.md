@@ -4,7 +4,9 @@
 
 [![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/meimiaoji-creator/meow-dsh-workflow)
 
-![角色选择按钮与工作流面板](docs/screenshots/roles-panel.png)
+<img width="2549" height="1242" alt="image" src="https://github.com/user-attachments/assets/f4d6a1ed-c3d6-494b-9f5b-356d43340b80" />
+<img width="1512" height="393" alt="image" src="https://github.com/user-attachments/assets/3bb8bfe2-ce18-4b40-a911-447c24ebac03" />
+<img width="2058" height="939" alt="image" src="https://github.com/user-attachments/assets/b86fd13f-61f9-4045-bc3e-7be4ac41a3e9" />
 
 meow-dsh-workflow 是一个双面（node + browser）DSH 插件：内置一套可编辑的 **Agent 角色库**（研发链路 / 头脑风暴 / 3D 导演），把角色定义编译成系统提示词与工具白名单。你可以在输入框右侧点「角色」按钮、或敲 `/meow-workflow-<角色id>` 斜杠命令按角色发起会话；主 agent 再通过 `meow_agent_call` 按同一套角色定义创建/续聊**带 persona 与工具白名单的子 agent**，形成多层语言链。配套角色记忆（跨会话）与公司台账簿（decisions/actions/need-boss 等六本账，按项目隔离）。
 
